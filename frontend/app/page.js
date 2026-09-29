@@ -7,7 +7,7 @@ export default async function HomePage() {
   return (
     <div>
       <section className="hero">
-        <h1>Next.js Monorepo Web Application</h1>
+        <h1>Next.js Ahmed Devops Web Application</h1>
         <p>
           Connected seamlessly to the .NET REST API backend and MySQL database.
           Fast, SSR-enabled user frontend.
