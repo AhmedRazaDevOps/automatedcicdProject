@@ -17,7 +17,7 @@ services:
       start_period: 30s
 
   api:
-    build: ./apis
+    image: ahmedrazadevops/proj2-api:latest # 👈 Changed from build to Docker Hub image
     restart: always
     ports:
       - "5005:5005"
@@ -32,9 +32,8 @@ services:
       database:
         condition: service_healthy
 
-
   frontend:
-    build: ./frontend  # 👈 Tells Docker to build from your local ./frontend folder
+    image: ahmedrazadevops/proj2-frontend:latest # 👈 Changed from build to Docker Hub image
     restart: always
     ports:
       - "3000:3000"
@@ -44,7 +43,7 @@ services:
       - api
 
   panel:
-    build: ./panel  # 👈 Tells Docker to build from your local ./panel folder
+    image: ahmedrazadevops/proj2-panel:latest # 👈 Changed from build to Docker Hub image
     restart: always
     ports:
       - "5173:80"
