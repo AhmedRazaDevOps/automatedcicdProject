@@ -1,0 +1,57 @@
+version: "3.9"
+
+services:
+  database:
+    image: mysql:8.0
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-rootpassword}
+      MYSQL_DATABASE: proj2_db
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p$${MYSQL_ROOT_PASSWORD:-rootpassword}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  api:
+    build: ./apis
+    restart: always
+    ports:
+      - "5005:5005"
+    environment:
+      ConnectionStrings__DefaultConnection: "Server=database;Port=3306;Database=proj2_db;Uid=root;Pwd=${MYSQL_ROOT_PASSWORD:-rootpassword};"
+      ASPNETCORE_ENVIRONMENT: Production
+      # 👇 FORCE .NET TO ONLY USE HTTP AND BIND TO PORT 5005
+      ASPNETCORE_URLS: "http://0.0.0" 
+      # 👇 DISABLE AUTOMATIC HTTPS REDIRECTION LOOPS IN DOCKER
+      ASPNETCORE_Kestrel__Certificates__Default__Password: "" 
+    depends_on:
+      database:
+        condition: service_healthy
+
+
+  frontend:
+    build: ./frontend  # 👈 Tells Docker to build from your local ./frontend folder
+    restart: always
+    ports:
+      - "3000:3000"
+    environment:
+      NEXT_PUBLIC_API_URL: http://${EC2_HOST:-localhost}:5005/api
+    depends_on:
+      - api
+
+  panel:
+    build: ./panel  # 👈 Tells Docker to build from your local ./panel folder
+    restart: always
+    ports:
+      - "5173:80"
+    environment:
+      VUE_APP_API_URL: http://${EC2_HOST:-localhost}:5005/api 
+    depends_on:
+      - api
+
+volumes:
+  mysql_data:

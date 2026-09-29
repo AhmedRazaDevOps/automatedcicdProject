@@ -1,0 +1,70 @@
+version: '3.8'
+
+services:
+  # MySQL Database Container
+  database:
+    image: mysql:8.0
+    container_name: proj2_database
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: proj2_db
+      MYSQL_USER: proj2_user
+      MYSQL_PASSWORD: proj2_password
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # .NET REST API Backend Container
+  apis:
+    build:
+      context: ./apis
+      dockerfile: Dockerfile
+    container_name: proj2_apis
+    restart: always
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings__DefaultConnection=Server=database;Port=3306;Database=proj2_db;Uid=root;Pwd=rootpassword;
+    ports:
+      - "5000:5000"
+    depends_on:
+      database:
+        condition: service_healthy
+
+  # Next.js User Frontend Container
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: proj2_frontend
+    restart: always
+    environment:
+      - NEXT_PUBLIC_API_URL=http://localhost:5000/api
+    ports:
+      - "3000:3000"
+    depends_on:
+      - apis
+
+  # Vue 3 Admin Control Panel Container
+  panel:
+    build:
+      context: ./panel
+      dockerfile: Dockerfile
+    container_name: proj2_panel
+    restart: always
+    environment:
+      - VITE_API_URL=http://localhost:5000/api
+    ports:
+      - "5173:5173"
+    depends_on:
+      - apis
+
+volumes:
+  mysql_data:
