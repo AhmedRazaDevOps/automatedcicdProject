@@ -1,5 +1,6 @@
 import { fetchProducts, fetchCategories } from '../../lib/api';
 
+
 export default async function ProductsPage() {
   const products = await fetchProducts();
   const categories = await fetchCategories();

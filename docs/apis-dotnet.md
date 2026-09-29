@@ -2,6 +2,7 @@
 
 ## 1. Overview & Technology Stack
 
+
 The backend API component located in `apis/` is constructed with **.NET 8 / .NET 9 Web API**. It provides RESTful endpoints to both the Next.js user frontend and the Vue.js admin panel.
 
 - **Framework**: .NET Web API
